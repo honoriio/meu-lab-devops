@@ -6,18 +6,20 @@ Esses comandos são fundamentais para estruturar projetos, organizar ambientes e
 ---
 
 ### `mkdir`
-Cria um novo diretório.
+Cria diretórios.
 
-- `mkdir pasta` → cria um diretório chamado `pasta`  
-- `mkdir pasta1 pasta2` → cria múltiplos diretórios de uma vez  
-- `mkdir -p caminho/completo/pasta` → cria diretórios aninhados, mesmo que os diretórios intermediários não existam  
+- `mkdir pasta` → cria um diretório  
+- `mkdir pasta1 pasta2` → cria múltiplos diretórios  
+- `mkdir -p caminho/pasta` → cria diretórios aninhados, mesmo que os intermediários não existam  
+- `mkdir -v pasta` → cria o diretório exibindo o que foi criado  
 
 ---
 
 ### `rmdir`
-Remove um diretório **vazio**.
+Remove diretórios **vazios**.
 
-- `rmdir pasta` → remove o diretório se ele estiver vazio  
+- `rmdir pasta` → remove o diretório se estiver vazio  
+- `rmdir -p caminho/pasta` → remove diretórios vazios em cadeia  
 
 ---
 
@@ -25,12 +27,22 @@ Remove um diretório **vazio**.
 Remove arquivos e diretórios.
 
 - `rm arquivo` → remove um arquivo  
-- `rm -r pasta` → remove um diretório e todo o seu conteúdo  
-- `rm -rf pasta` → remove diretório e conteúdo **sem pedir confirmação** (uso cuidadoso)  
+- `rm -i arquivo` → pede confirmação antes de remover  
+- `rm -r pasta` → remove diretório e seu conteúdo  
+- `rm -rf pasta` → remove diretório e conteúdo sem confirmação (**uso crítico**)  
+- `rm -v arquivo` → exibe o que está sendo removido  
+
+---
+
+### Combinações comuns
+- `rm -rv pasta` → remove diretório recursivamente mostrando o que foi apagado  
+- `rm -ri pasta` → remove diretório pedindo confirmação item a item  
 
 ---
 
 ### Boas práticas aprendidas
-- Sempre usar `pwd` antes de remover diretórios  
-- Preferir `ls` para conferir o conteúdo antes de usar `rm -r`  
-- Evitar `rm -rf` sem absoluta certeza do caminho  
+- Sempre conferir o caminho com `pwd`  
+- Usar `ls` antes de remover diretórios  
+- Preferir `-i` ou `-v` durante estudos  
+- Evitar `rm -rf` sem absoluta certeza  
+  

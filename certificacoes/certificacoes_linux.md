@@ -7,4 +7,4 @@
 
 ## Certificado: Manipulando arquivos no Linux
 
-![Descrição da imagem](certificacoes/certificados_pdfs/capa_linux.png)
+[![Certificado Linux](certificacoes/capa_linux.png)](certificacoes/manipulando_arquivos_no_linux.pdf)

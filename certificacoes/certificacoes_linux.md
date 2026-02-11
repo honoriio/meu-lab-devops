@@ -7,7 +7,7 @@
 
 ## Certificado: Manipulando arquivos no Linux
 
-[![Clique para abrir o PDF](certificacoes/certificados_pdfs/capa_linux.png)](certificacoes/certificados_pdfs/manipulando_arquivos_linux.pdf)
+[![Clique para abrir o PDF](certificacoes/certificados_pdfs/capa_linux.png)](certificacoes/certificados_pdfs/manipulando_arquivos_no_linux.pdf)
 
 > [!TIP]
 > Clique na imagem acima para visualizar o certificado completo em PDF.

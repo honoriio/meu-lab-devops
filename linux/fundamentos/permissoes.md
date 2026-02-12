@@ -1,0 +1,231 @@
+# Permissões no Linux — Minha Jornada de Aprendizado
+
+Este documento faz parte do meu **lab pessoal de estudos em Infraestrutura e DevOps**. Aqui eu registro meu aprendizado sobre **perissões no Linux**, um dos conceitos mais importantes para administração de sistemas, segurança e automação.
+
+Entender permissões é obrigatório para quem trabalha com **Infra**, **DevOps** ou **SRE**, porque praticamente tudo no Linux gira em torno de **quem pode acessar o quê, como e quando**.
+
+---
+
+## 🎯 Objetivo deste estudo
+
+Com este estudo, meu objetivo é:
+
+* Entender como funcionam permissões no Linux
+* Aprender a ler permissões de arquivos e diretórios
+* Saber alterar permissões corretamente
+* Compreender usuários, grupos e dono (owner)
+* Evitar erros comuns de segurança
+* Aplicar permissões de forma consciente em scripts e sistemas
+
+---
+
+## 🧠 Conceito básico de permissões
+
+No Linux, **tudo é tratado como arquivo** — arquivos comuns, diretórios, dispositivos e até processos.
+
+Cada arquivo ou diretório possui **três níveis de permissão**:
+
+1. **Usuário (owner)** — dono do arquivo
+2. **Grupo (group)** — grupo associado ao arquivo
+3. **Outros (others)** — todos os demais usuários
+
+E três tipos de permissão:
+
+* **r (read)** — leitura
+* **w (write)** — escrita
+* **x (execute)** — execução
+
+---
+
+## 👀 Visualizando permissões
+
+Para ver permissões, utilizo:
+
+```bash
+ls -l
+```
+
+Exemplo de saída:
+
+```text
+-rwxr-xr-- 1 diego devops 4096 script.sh
+```
+
+---
+
+## 🔍 Entendendo a saída do ls -l
+
+```text
+-rwxr-xr--
+```
+
+Quebro isso da seguinte forma:
+
+* `-` → tipo de arquivo (arquivo comum)
+* `rwx` → permissões do usuário (owner)
+* `r-x` → permissões do grupo
+* `r--` → permissões de outros
+
+Tipos de arquivo mais comuns:
+
+* `-` arquivo comum
+* `d` diretório
+* `l` link simbólico
+
+---
+
+## 📁 Permissões em diretórios (importante)
+
+Em diretórios, as permissões têm um significado específico:
+
+* **r** → listar arquivos (`ls`)
+* **w** → criar, apagar ou renomear arquivos
+* **x** → acessar o diretório (`cd`)
+
+Sem a permissão `x`, não é possível entrar no diretório, mesmo com `r`.
+
+---
+
+## 🔧 Alterando permissões — chmod
+
+O comando principal para alterar permissões é o `chmod`.
+
+### Modo simbólico
+
+```bash
+chmod u+x arquivo.sh   # adiciona execução ao usuário
+chmod g+w arquivo.txt  # adiciona escrita ao grupo
+chmod o-r arquivo.txt  # remove leitura de outros
+```
+
+Onde:
+
+* `u` → usuário
+* `g` → grupo
+* `o` → outros
+* `a` → todos
+
+---
+
+### Modo numérico (octal)
+
+Cada permissão possui um valor:
+
+* r = 4
+* w = 2
+* x = 1
+
+Exemplos:
+
+```bash
+chmod 755 script.sh
+chmod 644 arquivo.txt
+```
+
+Interpretação:
+
+* **755** → dono: rwx | grupo: r-x | outros: r-x
+* **644** → dono: rw- | grupo: r-- | outros: r--
+
+---
+
+## 👤 Alterando dono e grupo — chown
+
+Para alterar o dono de um arquivo:
+
+```bash
+chown usuario arquivo.txt
+```
+
+Para alterar dono e grupo:
+
+```bash
+chown usuario:grupo arquivo.txt
+```
+
+Alterar recursivamente:
+
+```bash
+chown -R usuario:grupo diretorio/
+```
+
+---
+
+## 👥 Alterando grupo — chgrp
+
+```bash
+chgrp grupo arquivo.txt
+```
+
+Uso isso quando preciso apenas ajustar o grupo sem alterar o dono.
+
+---
+
+## 🔁 Permissões recursivas
+
+Para aplicar permissões em diretórios e arquivos internos:
+
+```bash
+chmod -R 755 diretorio/
+```
+
+⚠️ Uso com cuidado, pois pode quebrar permissões importantes.
+
+---
+
+## 🔐 Permissões e scripts
+
+Para executar um script:
+
+* O arquivo precisa ter permissão `x`
+* O usuário precisa ter direito de execução
+
+Exemplo:
+
+```bash
+chmod +x script.sh
+./script.sh
+```
+
+Sem permissão:
+
+```text
+Permission denied
+```
+
+---
+
+## ⚠️ Erros comuns que aprendi a evitar
+
+* Usar `chmod 777` indiscriminadamente
+* Rodar tudo como root
+* Quebrar permissões do sistema com `chmod -R /`
+* Não entender permissões antes de alterá-las
+
+---
+
+## 🧯 Boas práticas que estou seguindo
+
+* Sempre verificar permissões antes de alterar
+* Dar o mínimo de acesso necessário
+* Usar grupos para controlar acesso
+* Evitar permissões abertas
+* Testar mudanças em ambiente controlado
+
+---
+
+## 🧠 Conclusão
+
+Permissões são um dos pilares do Linux. Depois que comecei a entender como elas funcionam, muita coisa fez mais sentido: erros de acesso, falhas de execução, problemas de segurança.
+
+Dominar permissões é essencial para:
+
+* Administração de sistemas
+* Segurança
+* Execução de scripts
+* Ambientes multiusuário
+* Infraestrutura e DevOps
+
+---
+
+📌 **Este documento faz parte do meu lab pessoal e será atualizado conforme eu avançar nos estudos.**

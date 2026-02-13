@@ -1,165 +1,119 @@
-Grupos no Linux — Minha Jornada de Aprendizado
-Esse documento faz parte do meu lab pessoal de estudos em Infraestrutura, Linux e DevOps.
-Aqui eu tô registrando tudo que tô aprendendo sobre grupos no Linux, porque depois de bater a cabeça um tempão com permissões, ficou claro pra mim que grupos são o verdadeiro coração do controle de acesso. Sem entender isso direito, as permissões viram uma bagunça e a gente acaba tomando decisão de segurança que dá medo.
+# Permissões no Linux — Minha Jornada de Aprendizado
+Este documento faz parte do meu lab pessoal de estudos em Infraestrutura e DevOps. Aqui eu registro meu aprendizado sobre permissões no Linux. Mano, esse é um dos conceitos mais importantes. Se você não manja disso, você não administra nada no Linux direito, fica tudo na base do "tentativa e erro".
+
+Entender permissões é obrigatório pra quem quer ser Infra, DevOps ou SRE, porque no Linux quase tudo gira em torno de: quem pode fazer o quê, como e quando.
 
 🎯 Objetivo deste estudo
-Meu objetivo com esse estudo é bem simples:
+O que eu foquei em aprender aqui:
 
-Entender de verdade o que é um grupo no Linux
-Aprender a criar, gerenciar e remover grupos sem quebrar nada
-Sacar a diferença entre grupo primário e secundário (demorei pra isso, hein)
-Ver como os grupos se conectam com as permissões de arquivos
-Usar grupos pra controlar acesso de forma inteligente e segura
-Evitar os erros clássicos que todo mundo (inclusive eu) comete no começo
+Sacar como o Linux pensa na hora de liberar ou bloquear um acesso.
 
+Aprender a ler aquela sopa de letrinhas do ls -l.
 
-🧠 Conceito básico de grupos no Linux
-Eu entendi que grupo no Linux é basicamente uma forma de juntar usuários que precisam do mesmo tipo de acesso. Em vez de ficar dando permissão um por um (o que é um pesadelo), a gente associa arquivos e pastas a um grupo e define as regras pra todo mundo de uma vez.
-Todo grupo tem:
+Alterar permissões do jeito certo (sem apelar pro 777).
 
-Um nome (tipo devops)
-Um GID (Group ID, que é tipo o "CPF" do grupo)
-Uma lista de usuários que fazem parte dele
+Entender a hierarquia: Usuário vs Grupo vs Outros.
 
-Todas essas informações ficam guardadas no arquivo /etc/group. Eu dei uma olhada nele e é bem simples:
-Formato de cada linha:
-textnome_do_grupo:x:GID:usuario1,usuario2
-Exemplo real que eu vi no meu sistema:
-textdevops:x:1001:diego,joao,marina
+Parar de passar raiva com o erro "Permission denied" em scripts.
 
-devops → nome do grupo
-x → senha (quase nunca usado hoje em dia)
-1001 → GID
-diego,joao,marina → os caras que fazem parte
+🧠 O conceito: No Linux, tudo é arquivo!
+Uma coisa que aprendi logo de cara: no Linux, tudo é tratado como arquivo. Arquivo de texto, pasta (diretório), o seu mouse e até os processos.
 
+Cada um desses caras tem três níveis de acesso:
 
-🔍 Listando grupos (comandos que eu uso o tempo todo)
-Bash# Ver todos os grupos do sistema
-getent group
+Usuário (owner): O dono da criança.
 
-# Só os grupos "normais" (GID maior ou igual a 1000)
-awk -F: '$3 >= 1000 {print $1 ":" $3}' /etc/group
+Grupo (group): A "equipe" que tem acesso.
 
-# Grupos de um usuário específico
-groups diego
+Outros (others): O resto do mundo.
 
-# Mais completo (uid, gid e todos os grupos)
-id diego
-A saída do id diego fica mais ou menos assim:
-textuid=1000(diego) gid=1000(diego) groups=1000(diego),27(sudo),1001(devops)
+E pra cada nível, existem três tipos de permissão:
 
-👤👥 Grupo primário vs grupos secundários
-Todo usuário tem um grupo primário (obrigatório) e pode ter vários grupos secundários.
-Eu testei isso e entendi assim:
+r (read): Ler / Ver o conteúdo.
 
-O primário é o que o usuário ganha quando é criado e é o grupo que os arquivos novos dele recebem automaticamente.
-Os secundários são os "extras" (tipo sudo, docker, devops...).
+w (write): Escrever / Editar / Apagar.
 
-No exemplo acima:
+x (execute): Rodar o script ou entrar na pasta.
 
-Grupo primário: diego (gid 1000)
-Secundários: sudo e devops
+👀 Visualizando a "Sopa de Letrinhas"
+Pra ver como as permissões estão, o comando de guerra é o:
 
-Dica que eu aprendi na marra: o primário é definido na hora de criar o usuário e é usado pra tudo que ele cria. Os secundários são pra dar acesso extra.
+Bash
+ls -l
+Exemplo de saída que analisei:
+-rwxr-xr-- 1 diego devops 4096 script.sh
 
-🛠️ Criando e gerenciando grupos
-Criando um grupo
-Bash# O jeito mais simples (o sistema escolhe o GID)
-sudo groupadd devops
+Eu aprendi a quebrar esse -rwxr-xr-- assim:
 
-# Se eu quiser definir o GID na mão (quase nunca preciso)
-sudo groupadd -g 1500 devops
-Eu costumo deixar o sistema escolher, fica mais fácil.
-Adicionando usuário em grupo (CUIDADO MÁXIMO AQUI)
-Bash# Jeito CERTO (mantém todos os outros grupos)
-sudo usermod -aG devops diego
+O primeiro caractere (-) diz o que é: - é arquivo, d é diretório (pasta).
 
-# Jeito ERRADO (que eu já fiz e me arrependi)
-sudo usermod -G devops diego   # ← isso apaga todos os outros grupos! rs
-Lição aprendida: nunca esquece o -a (append). Eu já ferrei um usuário uma vez e tive que recriar os grupos dele.
-Removendo usuário de um grupo
-Bashsudo gpasswd -d diego devops
-Apagando um grupo
-Bashsudo groupdel devops
-Atenção importante:
-Não dá pra apagar um grupo se ele for primário de alguém. Eu verifico antes assim:
-Bashgrep devops /etc/passwd
-Se aparecer alguém, mudo o primário primeiro com usermod -g.
+Os próximos três (rwx) são do Dono.
 
-📂 Grupos e arquivos (onde a mágica acontece)
-Todo arquivo tem dono, grupo e permissões. Exemplo que eu vejo bastante:
-text-rw-r-----  1 diego  devops  1024  jan 15  arquivo.txt
-Significa:
+Os três do meio (r-x) são do Grupo.
 
-diego (dono) → pode ler e escrever
-quem tá no grupo devops → pode ler
-outros → nada
+Os três últimos (r--) são dos Outros.
 
-Mudando o grupo de arquivos
-Bash# Só muda o grupo
-chgrp devops arquivo.txt
+👤👥 A "Virada de Chave": Como o acesso é validado
+Essa parte foi onde as coisas realmente clicaram pra mim. O Linux não pergunta "Quem é você?", ele segue uma ordem lógica e para na primeira que der certo:
 
-# Ou usando chown (eu uso mais esse)
-chown :devops arquivo.txt
+Você é o dono? Se sim, ele olha as permissões de dono e pronto.
 
-# Em pasta inteira (recursivo)
-chown -R :devops /srv/projetos/
+Se não é o dono, você tá no grupo? Se sim, ele aplica o que o grupo pode fazer e para por aí.
 
-🔐 Exemplo prático que eu uso em servidor
-Esse fluxo eu testei e ficou show:
-Bash# 1. Crio o grupo
-sudo groupadd devops
+Não é nenhum dos dois? Então você é "Outros" e só faz o que estiver no final da linha.
 
-# 2. Adiciono a galera
-sudo usermod -aG devops diego
-sudo usermod -aG devops joao
-sudo usermod -aG devops marina
+Regra mental que eu uso: O Linux sempre tenta te encaixar no papel mais específico primeiro.
 
-# 3. Mudo o grupo da pasta
-sudo chown -R :devops /srv/projetos
+🛠️ Comandos que usei pra mudar tudo
+1. O famoso chmod (Change Mode)
+Usei muito pra dar permissão de execução em scripts.
 
-# 4. Permissões certas
-sudo chmod -R 770 /srv/projetos
-Resultado: só quem tá no grupo devops consegue mexer. Perfeito pra projeto em equipe.
+No modo simbólico (mais fácil de lembrar):
 
-🚨 Grupos que eu NUNCA mexo
-Aprendi que tem grupos do sistema que são sagrados:
+Bash
+chmod u+x script.sh   # "Dono recebe (+) execução"
+chmod g+w arquivo.txt # "Grupo recebe (+) escrita"
+chmod o-r arquivo.txt # "Outros perdem (-) leitura"
+No modo numérico (o famoso octal):
+Aqui cada letra tem um valor: r=4, w=2, x=1. Você soma e pronto.
 
-root
-sudo (ou wheel em Fedora/Arch)
-adm
-daemon
-sys
-systemd-*
+7 (4+2+1) = Acesso total.
 
-Se eu apagar algum desses, o sistema vira um caos. Melhor nem arriscar.
+5 (4+1) = Ler e executar.
 
-⚠️ Erros comuns que eu já cometi (e que você provavelmente vai cometer)
+4 = Só ler.
 
-Esquecer o -a no usermod e perder todos os grupos (já aconteceu)
-Criar grupo pra tudo e depois não lembrar pra que serve
-Dar 777 porque "não funcionou com grupo" (nunca mais)
-Remover grupo sem checar o /etc/passwd
-Fazer tudo como root (aí grupo vira inútil)
+Bash
+chmod 755 script.sh  # Dono faz tudo, o resto só lê e executa.
+chmod 644 texto.txt   # Dono lê/escreve, o resto só lê.
+2. Mudando o Dono com chown
+Bash
+# Mudar o dono
+sudo chown diego arquivo.txt
 
+# Mudar o dono e o grupo de uma vez (bem útil)
+sudo chown diego:devops arquivo.txt
 
-🧯 Boas práticas que tô tentando seguir
+# Mudar uma pasta inteira e tudo dentro dela
+sudo chown -R diego:devops minha_pasta/
+📁 Cuidado com as Pastas (Diretórios)!
+Aprendi que o x (execução) em pastas é diferente. Sem o x, você nem consegue dar um cd pra entrar nela, mesmo que tenha permissão de leitura (r). Fiquei um tempo tentando entender por que não entrava na pasta e era isso!
 
-Usar grupos pra dar acesso em vez de permissões abertas
-Sempre rodar id usuario antes e depois de mudar
-Documentar quem tá em qual grupo (principalmente em servidor)
-Testar tudo em VM antes de mexer em produção
-Preferir 770 ou 750 em pastas compartilhadas
-Dar nomes claros pros grupos (ex: equipe_web, time_backup)
+⚠️ Erros que cometi e quero evitar
+🚨 chmod 777 em tudo: Isso é o "botão do pânico". Funciona? Sim. É seguro? Nem um pouco. É tipo deixar a chave da sua casa na fechadura pelo lado de fora.
 
+🚨 Rodar tudo como root: Se eu erro um comando como root, eu posso apagar o sistema inteiro. Melhor usar o sudo só quando precisar.
 
-🧠 O que eu tirei disso até agora
-Depois que cliquei no lance dos grupos, as permissões finalmente fizeram sentido pra mim. Eles são tipo a ponte entre usuários, arquivos, permissões e segurança.
-Dominar isso é essencial pra:
+🚨 chmod -R sem pensar: Já mudei permissão de coisa que não devia dentro de pastas do sistema e quase quebrei o boot. Tem que usar o -R (recursivo) com muita calma.
 
-Administração de sistemas
-Ambientes multiusuário
-Servidores Linux de verdade
-Tudo que envolve DevOps e SRE
+🧯 Minhas Boas Práticas
+Sempre dou um ls -l antes e depois de mudar uma permissão pra conferir se não fiz besteira.
+
+Uso grupos para gerenciar acessos de várias pessoas (mais organizado).
+
+Tento dar sempre o mínimo de acesso necessário. Se o cara só precisa ler, pra que dar permissão de escrita?
+
+🧠 Conclusão
+Depois que você entende as permissões, o Linux deixa de ser um "bicho de sete cabeças". Erros de "Permission denied" agora são fáceis de resolver porque eu já sei onde olhar. É a base de tudo pra quem quer trabalhar com servidores e automação.
 
 📌 Este documento faz parte do meu lab pessoal e será atualizado conforme eu avançar nos estudos.

@@ -36,9 +36,22 @@ done
 
 echo "Direcionando os usuários para seus devidos grupos..."
 
-usermod -aG GRP_ADM maria carlos joao
-usermod -aG GRP_VEN debora sebastiana roberto
-usermod -aG GRP_SEC josefina amanda rogerio
+echo "Direcionando usuarios ao grupo ADM"
+usermod -aG GRP_ADM maria carlos
+usermod -aG GRP_ADM carlos
+usermod -aG GRP_ADM joao
+
+echo "Direcionando usuarios ao grupo VEN"
+
+usermod -aG GRP_VEN debora 
+usermod -aG GRP_VEN sebastiana 
+usermod -aG GRP_VEN roberto
+
+echo "Direcionando Usuarios ao grupo SEC"
+
+usermod -aG GRP_SEC josefina
+usermod -aG GRP_SEC amanda 
+usermod -aG GRP_SEC rogerio
 
 echo "Criando permissões e definindo grupos"
 

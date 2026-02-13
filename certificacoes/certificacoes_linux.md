@@ -7,7 +7,7 @@
 
 ## Certificado: Manipulando arquivos no Linux
 
-[![Certificado Linux](capa_linux.png)](manipulando_arquivos_no_linux.pdf)
+[![Certificado Linux](capa_manipulando_arquivos_no_linux.png)](manipulando_arquivos_no_linux.pdf)
 
 
 ## Certificado: Gerenciando Usuários no Linux

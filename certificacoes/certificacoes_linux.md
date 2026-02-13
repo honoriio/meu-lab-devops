@@ -17,5 +17,4 @@
 
 ## Certificado: Infraestrutura em Codigo
 
-[![Certificado Linux](capa_infraestrutura_como_codigo.png)](Infraestrutura como Código: Script.pdf)
-
+[![Certificado Linux](capa_infraestrutura_como_codigo.png)](Infraestrutura_como_codigo.pdf)

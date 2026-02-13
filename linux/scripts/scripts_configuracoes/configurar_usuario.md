@@ -1,13 +1,13 @@
-# Script de Criação de Usuários e Grupos — Minha Jornada de Aprendizado
+# Script de Criação de Usuários, Grupos e Permissões — Minha Jornada de Aprendizado
 
-Esse é um script que eu fiz pra automatizar a **criação de diretórios, grupos e usuários no Linux**, tudo de forma padronizada e segura (ao menos para estudos).  
-Mano, eu aprendi que scripts assim salvam muita dor de cabeça, porque criar tudo na mão dá pra quebrar a cabeça fácil.
+Esse é o script que eu fiz pra automatizar **diretórios, grupos e usuários no Linux**, tudo de forma segura (pelo menos pra estudo).  
+Mano, aprendi que criar tudo na mão dá pra se perder fácil, então automatizar salva muito tempo e evita erros.
 
 ---
 
 ## 🎯 Objetivo deste estudo
 
-O que eu quis aprender e testar com esse script:
+Com esse script, meu foco foi:
 
 * Criar diretórios automaticamente  
 * Criar grupos sem conflito de nomes  
@@ -27,38 +27,69 @@ mkdir -p /publico
 mkdir -p /adm
 mkdir -p /ven
 mkdir -p /sec
-Aprendi que o -p evita erro se o diretório já existir.
-/publico é pra acesso geral, e os outros são pra grupos específicos.
+````
 
-2️⃣ Criando grupos
+> Aprendi que o `-p` evita erro se o diretório já existir.
+> `/publico` é pra acesso geral, e os outros são específicos para cada grupo.
+
+---
+
+### 2️⃣ Criando grupos
+
+```bash
 for g in GRP_ADM GRP_VEN GRP_SEC; do
   getent group "$g" >/dev/null || groupadd "$g"
 done
-Aqui eu usei uma checagem pra não criar grupo repetido.
-Mano, antes eu esquecia de checar e quebrava o script. Agora tá seguro. rs
+```
 
-3️⃣ Criando usuários
+> Aqui o script checa se o grupo já existe antes de criar, assim não dá conflito.
+> Mano, antes eu esquecia de fazer isso e quebrava tudo. rs
+
+---
+
+### 3️⃣ Criando usuários
+
+```bash
 for u in maria carlos joao debora sebastiana roberto josefina amanda rogerio; do
   useradd -m -s /bin/bash "$u"
 done
--m cria a home do usuário, -s /bin/bash define o shell.
-No futuro quero deixar isso mais modular, tipo ler nomes de um arquivo e criar automático.
+```
 
-4️⃣ Definindo senhas
+> `-m` cria a home do usuário, `-s /bin/bash` define o shell.
+> Depois quero deixar isso mais modular, tipo ler de um arquivo e criar automaticamente.
+
+---
+
+### 4️⃣ Definindo senhas
+
+```bash
 for u in maria carlos joao debora sebastiana roberto josefina amanda rogerio; do
   echo "$u:Senha@123" | chpasswd
   passwd -e "$u"
 done
-Criei senhas fracas só pra estudo, porque no mundo real tem que ter política de segurança séria.
-passwd -e força o usuário a trocar a senha no primeiro login.
+```
 
-5️⃣ Associando usuários aos grupos
+> Senhas fracas só pra estudo. Na vida real teria política séria.
+> `passwd -e` força o usuário a trocar a senha no primeiro login. Bem útil pra aprendizado.
+
+---
+
+### 5️⃣ Associando usuários aos grupos
+
+```bash
 usermod -aG GRP_ADM maria carlos joao
 usermod -aG GRP_VEN debora sebastiana roberto
 usermod -aG GRP_SEC josefina amanda rogerio
-O -aG é importante pra não perder outros grupos do usuário, já me ferrei antes esquecendo isso. 😅
+```
 
-6️⃣ Definindo permissões e donos dos diretórios
+> O `-aG` é importante pra não perder outros grupos que o usuário já tem.
+> Já me ferrei esquecendo disso. 😅
+
+---
+
+### 6️⃣ Definindo permissões e donos dos diretórios
+
+```bash
 chown root:GRP_ADM /adm
 chmod 770 /adm
 
@@ -69,30 +100,124 @@ chown root:GRP_SEC /sec
 chmod 770 /sec
 
 chmod 777 /publico
-/adm, /ven e /sec → acesso completo pra dono e grupo, ninguém mais
-/publico → todo mundo pode acessar, por isso 777
+```
 
-⚠️ Observações importantes que aprendi
-Sempre checar se grupo/usuário já existe antes de criar
+> `/adm`, `/ven` e `/sec` → acesso total pra dono e grupo, outros não têm acesso
+> `/publico` → todo mundo pode acessar, por isso 777
+> Demorei pra sacar que 770 e 777 fazem diferença enorme na segurança.
 
-chmod 770 protege diretórios de acessos indesejados
+---
 
--aG no usermod evita perder grupos
+## 🔍 Conceito que aprendi na prática
 
-Senhas fracas só pra testes educacionais
+No Linux, **tudo é arquivo**: arquivos, diretórios, dispositivos e até processos.
 
-🧯 Boas práticas que estou tentando seguir
-Automatizar tarefas repetitivas pra evitar erro humano
+Cada arquivo/diretório tem:
 
-Padronizar nomes de grupos e usuários
+* **Dono (owner)**
+* **Grupo (group)**
+* **Outros (others)**
 
-Separar diretórios por grupo pra facilitar controle de acesso
+Permissões possíveis:
 
-Documentar cada passo no script
+* `r` → ler
+* `w` → escrever / editar / apagar
+* `x` → executar / entrar na pasta
 
-🧠 Conclusão
-Esse script me ajudou a entender na prática como grupos, usuários e permissões trabalham juntos no Linux.
-Mano, automatizar faz tudo ficar mais rápido, seguro e fácil de manter.
-Aprendi muito sobre useradd, groupadd, usermod, chmod e chown, e agora consigo montar ambientes multiusuário de estudo de forma segura.
+> Regra mental que eu uso: o Linux sempre testa o mais específico primeiro: dono → grupo → outros.
 
-📌 Este documento faz parte do meu lab pessoal e será atualizado conforme eu aprimorar o script e meus estudos.
+---
+
+## 👤👥 Relação entre usuários e grupos
+
+Todo usuário:
+
+* Tem **um grupo primário**
+* Pode estar em **vários grupos secundários**
+
+Exemplo:
+
+```bash
+id diego
+```
+
+Saída:
+
+```text
+uid=1000(diego) gid=1000(diego) groups=1000(diego),27(sudo),1001(devops)
+```
+
+* Grupo primário: `diego`
+* Grupos secundários: `sudo`, `devops`
+
+---
+
+## 🛠️ Usando grupos e permissões
+
+Fluxo que faz sentido pra mim:
+
+1. Criar grupo:
+
+```bash
+sudo groupadd devops
+```
+
+2. Adicionar usuário:
+
+```bash
+sudo usermod -aG devops diego
+```
+
+3. Associar diretório ao grupo:
+
+```bash
+sudo chown :devops /srv/projetos
+```
+
+4. Definir permissões:
+
+```bash
+chmod 770 /srv/projetos
+```
+
+Resultado:
+
+* Dono e grupo → acesso total
+* Outros → sem acesso
+
+> Esse padrão é o que mais vi em servidores e ambientes corporativos.
+
+---
+
+## ⚠️ Erros que já cometi
+
+* `chmod 777` em tudo → funciona mas é perigoso
+* Rodar comandos desnecessariamente como root
+* `chmod -R` sem pensar → quase quebrei pastas do sistema
+* Esquecer `-aG` no `usermod` → usuário perde grupo
+
+---
+
+## 🧯 Boas práticas que estou tentando seguir
+
+* Sempre conferir permissões antes e depois
+* Dar o mínimo de acesso necessário
+* Usar grupos pra organizar usuários
+* Documentar alterações
+* Testar em ambiente controlado
+
+---
+
+## 🧠 Conclusão
+
+Esse script **me ajudou a entender na prática** como:
+
+* Diretórios, usuários e grupos se conectam
+* Permissões funcionam de verdade
+* Automatizar tarefas evita erros e salva tempo
+
+> Agora consigo montar ambientes multiusuário de estudo de forma **segura e organizada**.
+
+---
+
+📌 **Este documento faz parte do meu lab pessoal e será atualizado conforme eu aprimorar o script e meus estudos.**

@@ -12,4 +12,4 @@
 
 ## Certificado: Gerenciando Usuários no Linux
 
-[![Certificado Linux](capa_linux.png)](gerenciando_usuarios_no_linux.pdf)
+[![Certificado Linux](capa_gerenciando_usuarios_no_linux.png)](gerenciando_usuarios_no_linux.pdf)

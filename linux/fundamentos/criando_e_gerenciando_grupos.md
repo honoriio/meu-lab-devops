@@ -36,7 +36,6 @@ Todo grupo possui:
 
 As informações de grupos ficam no arquivo:
 
-```bash
 /etc/group
 📂 Arquivo /etc/group
 Formato padrão de uma linha:
@@ -248,4 +247,3 @@ servidores Linux
 Infraestrutura, DevOps e SRE
 
 📌 Este documento faz parte do meu lab pessoal e será atualizado conforme eu avançar nos estudos.
-

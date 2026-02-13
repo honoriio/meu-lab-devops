@@ -1,7 +1,7 @@
-# Grupos no Linux — Minha Jornada de Aprendizado
+# Permissões e Grupos no Linux — Minha Jornada de Aprendizado
 
-Este documento faz parte do meu **lab pessoal de estudos em Infraestrutura e DevOps**. Aqui eu registro meu aprendizado sobre **grupos no Linux**, um conceito fundamental que conecta diretamente com permissões, segurança e ambientes multiusuário.  
-Mano, percebi que sem entender grupos, as permissões ficam confusas e qualquer decisão de segurança pode sair pela culatra.  
+Este documento faz parte do meu **lab pessoal de estudos em Infraestrutura e DevOps**. Aqui eu registro meu aprendizado sobre **permissões e grupos no Linux**, dois conceitos fundamentais pra administrar sistemas, segurança e automação.  
+Mano, esses tópicos são cruciais: se você não manja disso, você não controla nada direito no Linux, fica tudo na base do “tentativa e erro”.
 
 ---
 
@@ -9,231 +9,374 @@ Mano, percebi que sem entender grupos, as permissões ficam confusas e qualquer 
 
 O que eu foquei em aprender aqui:
 
-* Entender o que são grupos no Linux  
-* Aprender a criar, remover e gerenciar grupos  
-* Compreender a diferença entre grupo primário e secundário  
-* Entender como grupos se relacionam com permissões  
-* Evitar erros comuns de administração e segurança  
-* Aplicar grupos de forma prática em diretórios e arquivos  
+* Entender como funcionam permissões e grupos no Linux  
+* Aprender a ler permissões de arquivos e diretórios  
+* Saber criar, alterar e remover grupos  
+* Compreender usuários, grupos, dono (owner) e outros níveis de acesso  
+* Evitar erros comuns de segurança  
+* Aplicar permissões e grupos de forma prática em scripts e sistemas  
+
+---
+
+## 🧠 Conceito básico de permissões
+
+No Linux, **tudo é tratado como arquivo** — arquivos comuns, diretórios, dispositivos e até processos.
+
+Cada arquivo/diretório possui **três níveis de permissão**:
+
+1. **Usuário (owner)** — dono do arquivo  
+2. **Grupo (group)** — grupo associado ao arquivo  
+3. **Outros (others)** — todos os demais usuários  
+
+E três tipos de permissão:
+
+* **r (read)** — leitura  
+* **w (write)** — escrita  
+* **x (execute)** — execução  
+
+---
+
+## 👀 Visualizando permissões
+
+Pra ver permissões, o comando que mais usei foi:
+
+```bash
+ls -l
+````
+
+Exemplo:
+
+```text
+-rwxr-xr-- 1 diego devops 4096 script.sh
+```
+
+---
+
+## 🔍 Entendendo a saída do ls -l
+
+Quebro assim:
+
+* `-` → tipo de arquivo (arquivo comum)
+* `rwx` → permissões do usuário (owner)
+* `r-x` → permissões do grupo
+* `r--` → permissões de outros
+
+Tipos de arquivo mais comuns:
+
+* `-` arquivo comum
+* `d` diretório
+* `l` link simbólico
+
+---
+
+## 👤👥 Como permissões se ligam a usuários e grupos
+
+O Linux **não dá permissão diretamente pra usuários individuais**. Ele avalia em ordem:
+
+1. Você é o **dono** do arquivo? → aplica permissão do dono
+2. Se não, você tá no **grupo** do arquivo? → aplica permissão do grupo
+3. Se não, você é **outros (others)** → aplica permissão final
+
+> Regra mental que eu uso: o Linux sempre tenta te encaixar no papel mais específico primeiro.
+
+---
+
+## 🔧 Alterando permissões — chmod
+
+### Modo simbólico
+
+```bash
+chmod u+x arquivo.sh   # adiciona execução ao usuário
+chmod g+w arquivo.txt  # adiciona escrita ao grupo
+chmod o-r arquivo.txt  # remove leitura de outros
+```
+
+### Modo numérico (octal)
+
+Valores: r=4, w=2, x=1
+
+```bash
+chmod 755 script.sh   # dono faz tudo, grupo/others lê e executa
+chmod 644 arquivo.txt  # dono lê/escreve, grupo/others só lê
+```
+
+---
+
+## 👤 Alterando dono e grupo — chown
+
+```bash
+# mudar dono
+sudo chown diego arquivo.txt
+
+# mudar dono e grupo
+sudo chown diego:devops arquivo.txt
+
+# mudar recursivamente
+sudo chown -R diego:devops minha_pasta/
+```
+
+---
+
+## 👥 Alterando grupo — chgrp
+
+```bash
+chgrp devops arquivo.txt
+```
+
+> Útil quando só preciso mudar o grupo, sem alterar dono.
+
+---
+
+## 🔁 Permissões recursivas
+
+```bash
+chmod -R 755 diretorio/
+```
+
+⚠️ Cuidado: alterar recursivamente pode quebrar coisas importantes.
+
+---
+
+## 🔐 Permissões e scripts
+
+Para executar um script:
+
+* O arquivo precisa de permissão `x`
+* O usuário precisa ter direito de execução
+
+```bash
+chmod +x script.sh
+./script.sh
+```
+
+Sem permissão:
+
+```text
+Permission denied
+```
 
 ---
 
 ## 🧠 Conceito básico de grupos
 
-Um **grupo** no Linux é uma forma de **organizar usuários** pra facilitar o controle de acesso.  
+Um **grupo** organiza usuários pra controlar acesso coletivo a arquivos/diretórios.
 
-Ao invés de dar permissão usuário por usuário, você pode:
+Ao invés de dar acesso usuário por usuário, você pode:
 
-* Associar arquivos e diretórios a grupos  
-* Definir permissões pra todo mundo do grupo  
+* Associar arquivos/diretórios a grupos
+* Definir permissões pro grupo
 
 Todo grupo possui:
 
-* Um **nome**  
-* Um **GID (Group ID)**  
-* Uma lista de **usuários membros**  
+* Nome
+* GID (Group ID)
+* Lista de membros
 
-As informações ficam no arquivo `/etc/group`.
+Informações ficam em `/etc/group`.
 
 ### 📂 Arquivo `/etc/group`
 
-Formato de uma linha:
+Formato:
 
 ```text
 nome_do_grupo:x:GID:usuario1,usuario2
-Exemplo que testei:
+```
 
+Exemplo:
+
+```text
 devops:x:1001:diego,joao
-Significado:
+```
 
-devops → nome do grupo
+---
 
-x → campo de senha (quase nunca usado)
+## 🔍 Listando grupos
 
-1001 → GID do grupo
+* Todos os grupos:
 
-diego,joao → usuários membros do grupo
-
-Demorei pra sacar isso no começo, mas agora faz muito sentido rs.
-
-🔍 Listando grupos
-Todos os grupos do sistema:
-
+```bash
 getent group
-Apenas grupos de usuários comuns (GID ≥ 1000):
+```
 
+* Apenas grupos de usuários (GID ≥ 1000):
+
+```bash
 awk -F: '$3 >= 1000 {print $1 ":" $3}' /etc/group
-Ver grupos de um usuário:
+```
 
+* Grupos de um usuário:
+
+```bash
 groups diego
-Mais completo:
+```
 
+* Mais completo:
+
+```bash
 id diego
-👤👥 Grupo primário vs secundários
+```
+
+---
+
+## 👤👥 Grupo primário vs secundários
+
 Todo usuário:
 
-Possui um grupo primário
-
-Pode pertencer a vários grupos secundários
+* Tem **grupo primário**
+* Pode ter **vários grupos secundários**
 
 Exemplo:
 
+```bash
 id diego
-Saída típica:
+```
 
+Saída:
+
+```text
 uid=1000(diego) gid=1000(diego) groups=1000(diego),27(sudo),1001(devops)
-Isso significa:
+```
 
-Primário: diego
+Primário: `diego`
+Secundários: `sudo`, `devops`
 
-Secundários: sudo, devops
+---
 
-📌 O grupo primário é definido na criação do usuário e usado automaticamente nos arquivos que ele cria.
+### ➕ Criando grupos
 
-➕ Criando grupos
-Grupo simples:
+```bash
+sudo groupadd devops           # simples
+sudo groupadd -g 1500 devops   # com GID específico
+```
 
-sudo groupadd devops
-Grupo com GID específico:
+> Geralmente deixo o sistema escolher o GID, mas às vezes é útil definir manualmente.
 
-sudo groupadd -g 1500 devops
-Normalmente deixo o sistema escolher o GID, mas às vezes é útil definir manualmente.
+---
 
-👥 Adicionando usuários a grupos
-Forma correta (sem remover outros grupos):
+### 👥 Adicionando usuários a grupos
 
-sudo usermod -aG devops usuario
-Exemplo que testei:
-
+```bash
 sudo usermod -aG devops diego
-⚠️ Não esquecer o -a, senão o usuário perde os outros grupos que já tinha — aprendi na marra rs.
+```
 
-➖ Removendo usuário de um grupo
-sudo gpasswd -d usuario grupo
-Exemplo:
+⚠️ Não esquecer o `-a`, senão perde outros grupos.
 
+---
+
+### ➖ Removendo usuário de um grupo
+
+```bash
 sudo gpasswd -d diego devops
-❌ Removendo grupos
-sudo groupdel nome_do_grupo
+```
+
+---
+
+### ❌ Removendo grupos
+
+```bash
+sudo groupdel devops
+```
+
 ⚠️ Um grupo não pode ser removido se for primário de algum usuário.
-Pra checar:
+Checar:
 
-grep nome_do_grupo /etc/passwd
-Se aparecer alguém, preciso mudar o grupo primário antes.
+```bash
+grep devops /etc/passwd
+```
 
-📂 Grupos e arquivos
-Todo arquivo/diretório possui:
+---
 
-Um dono (usuário)
+## 📂 Grupos e arquivos
 
-Um grupo
+Exemplo de arquivo:
 
-Permissões associadas a ambos
-
-Exemplo:
-
+```text
 -rw-r----- 1 diego devops 1024 arquivo.txt
-Aqui:
+```
 
-Dono: diego
+* Dono: `diego`
+* Grupo: `devops`
 
-Grupo: devops
+> Qualquer usuário do grupo `devops` terá acesso conforme as permissões do bloco de grupo.
 
-Qualquer usuário do grupo devops terá acesso conforme as permissões do grupo.
+---
 
-🛠️ Alterando grupo de arquivos
-Apenas o grupo:
+### 🛠️ Alterando grupo de arquivos
 
+```bash
 chgrp devops arquivo.txt
-Usando chown:
-
 chown :devops arquivo.txt
-Recursivamente:
-
 chown -R :devops diretorio/
-🔐 Controle de acesso prático
-Fluxo que uso nos testes:
+```
 
-Criar grupo:
+---
 
+### 🔐 Controle de acesso prático
+
+Fluxo que uso:
+
+```bash
 sudo groupadd devops
-Adicionar usuários:
-
-sudo usermod -aG devops usuario
-Associar diretório ao grupo:
-
+sudo usermod -aG devops diego
 sudo chown :devops /srv/projetos
-Definir permissões:
-
 chmod 770 /srv/projetos
+```
+
 Resultado:
 
-Dono e grupo → acesso total
+* Dono e grupo → acesso total
+* Outros → sem acesso
 
-Outros → sem acesso
+---
 
-Achei esse padrão muito útil, padrão de servidor corporativo.
+## 🚨 Grupos críticos (NUNCA remover)
 
-🚨 Grupos críticos (NUNCA remover)
-root
+* root
+* sudo
+* adm
+* wheel (Fedora/Arch)
+* daemon
+* sys
+* systemd-*
 
-sudo
+> Remover esses grupos quebra o sistema, já quebrei a cabeça com isso antes rs.
 
-adm
+---
 
-wheel (Fedora / Arch)
+## ⚠️ Erros comuns que aprendi a evitar
 
-daemon
+* Criar grupos sem necessidade
+* Remover grupos sem checar usuários
+* Confundir primário e secundário
+* Usar permissões abertas pra “consertar” erro
+* Administrar tudo como root
+* chmod 777 indiscriminadamente
 
-sys
+---
 
-systemd-*
+## 🧯 Boas práticas que estou seguindo
 
-Remover esses grupos quebra o sistema, já quebrei a cabeça com isso antes rs.
+* Conferir permissões e grupos antes/depois
+* Dar mínimo acesso necessário
+* Usar grupos pra organizar usuários
+* Testar mudanças em ambiente controlado
+* Documentar tudo
 
-⚠️ Erros comuns que aprendi a evitar
-Criar grupos sem necessidade
+---
 
-Remover grupos sem checar usuários
+## 🧠 Conclusão
 
-Confundir primário e secundário
+Depois que entendi **permissões e grupos**, muita coisa fez sentido.
+Erros de "Permission denied" e problemas de acesso agora são fáceis de resolver.
 
-Usar permissões abertas pra “consertar” erro
+Dominar isso é essencial pra:
 
-Administrar tudo como root
+* Administração de sistemas
+* Segurança
+* Execução de scripts
+* Ambientes multiusuário
+* Infraestrutura, DevOps e SRE
 
-🧯 Boas práticas que estou seguindo
-Usar grupos pra controlar acesso
+---
 
-Manter permissões restritas
-
-Conferir grupos com id antes e depois de mudanças
-
-Documentar alterações importantes
-
-Testar em ambiente controlado
-
-🧠 Conclusão
-Depois que entendi grupos, permissões e acesso fizeram sentido de verdade.
-
-Grupos conectam:
-
-Usuários
-
-Arquivos
-
-Permissões
-
-Segurança
-
-Dominar grupos é essencial pra:
-
-Administração de sistemas
-
-Ambientes multiusuário
-
-Servidores Linux
-
-Infraestrutura, DevOps e SRE
-
-📌 Este documento faz parte do meu lab pessoal e será atualizado conforme eu avançar nos estudos.
+📌 **Este documento faz parte do meu lab pessoal e será atualizado conforme eu avançar nos estudos.**

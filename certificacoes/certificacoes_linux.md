@@ -13,3 +13,9 @@
 ## Certificado: Gerenciando Usuários no Linux
 
 [![Certificado Linux](capa_gerenciando_usuarios_no_linux.png)](gerenciando_usuarios_no_linux.pdf)
+
+
+## Certificado: Infraestrutura em Codigo
+
+[![Certificado Linux](capa_infraestrutura_como_codigo.png)](Infraestrutura como Código: Script.pdf)
+

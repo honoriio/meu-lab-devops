@@ -246,7 +246,3 @@ Com essa aula avançada, consigo:
 * Garantir **boa organização e desempenho** do sistema
 
 > Este material representa meu estudo contínuo em Linux, administração de sistemas, infraestrutura e preparação para ambientes profissionais e DevOps.
-
-```
-
----

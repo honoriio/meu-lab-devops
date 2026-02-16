@@ -22,4 +22,8 @@
 
 ## Certificado: Gerenciamento de Pacotes no Linux
 
-[![Certificado Linux](gerenciamento_de_pacotes_linux.png)](gerenciamento_de_pacotes_linux.pdf)
+[![Certificado Linux](capa_gerenciamento_de_pacotes_linux.png)](gerenciamento_de_pacotes_linux.pdf)
+
+## Certificado: Gerenciamento de Pacotes no Linux
+
+[![Certificado Linux](capa_gerenciamento_de_discos_linux.png)](gerenciamento_de_discos_linux.pdf)

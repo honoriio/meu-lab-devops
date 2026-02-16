@@ -18,3 +18,8 @@
 ## Certificado: Infraestrutura em Codigo
 
 [![Certificado Linux](capa_infraestrutura_como_codigo.png)](Infraestrutura_como_codigo.pdf)
+
+
+## Certificado: Gerenciamento de Pacotes no Linux
+
+[![Certificado Linux](gerenciamento_de_pacotes_linux.png)](gerenciamento_de_pacotes_linux.pdf)

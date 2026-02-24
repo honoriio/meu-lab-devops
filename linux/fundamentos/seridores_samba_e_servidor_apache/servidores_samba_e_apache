@@ -1,0 +1,495 @@
+Abaixo está uma documentação completa em **Markdown**, escrita como se fosse um estudante documentando os estudos de **Linux**, focando em **Servidor de Arquivos (Samba)** e **Servidor Web (Apache)**.
+Você pode copiar diretamente para o seu repositório no GitHub.
+
+---
+
+# 📚 Estudos de Linux – Servidor de Arquivos (Samba) e Servidor Web (Apache)
+
+> Documentação criada para consolidar conhecimentos práticos sobre configuração de serviços essenciais em ambientes Linux: compartilhamento de arquivos em rede e hospedagem web.
+
+---
+
+# Índice
+
+* [Introdução](#introdução)
+* [Servidor de Arquivos com Samba](#servidor-de-arquivos-com-samba)
+
+  * [O que é o Samba](#o-que-é-o-samba)
+  * [Instalação do Samba](#instalação-do-samba)
+  * [Configuração do Samba](#configuração-do-samba)
+  * [Criando diretórios compartilhados](#criando-diretórios-compartilhados)
+  * [Criando usuários Samba](#criando-usuários-samba)
+  * [Testando o compartilhamento](#testando-o-compartilhamento)
+  * [Comandos importantes](#comandos-importantes)
+* [Servidor Web com Apache](#servidor-web-com-apache)
+
+  * [O que é o Apache](#o-que-é-o-apache)
+  * [Instalação do Apache](#instalação-do-apache)
+  * [Estrutura de diretórios do Apache](#estrutura-de-diretórios-do-apache)
+  * [Criando uma página web](#criando-uma-página-web)
+  * [Gerenciamento do serviço](#gerenciamento-do-serviço)
+  * [Virtual Hosts](#virtual-hosts)
+  * [Comandos importantes](#comandos-importantes-1)
+* [Boas práticas de segurança](#boas-práticas-de-segurança)
+* [Conclusão](#conclusão)
+
+---
+
+# Introdução
+
+Durante os estudos em Linux, dois serviços aparecem constantemente em ambientes profissionais:
+
+* **Servidor de arquivos** (compartilhamento em rede)
+* **Servidor web** (hospedagem de sites e aplicações)
+
+Nesta documentação serão abordados:
+
+* Samba (compartilhamento de arquivos)
+* Apache (servidor web)
+
+Os testes foram pensados para distribuições baseadas em Debian/Ubuntu.
+
+---
+
+# Servidor de Arquivos com Samba
+
+## O que é o Samba
+
+O **Samba** é um software que permite o compartilhamento de arquivos e impressoras entre sistemas Linux e Windows usando o protocolo **SMB/CIFS**.
+
+Na prática, ele permite:
+
+* Compartilhar pastas na rede
+* Acessar arquivos via Windows Explorer
+* Criar permissões por usuário
+
+Muito usado em:
+
+* Empresas
+* Laboratórios
+* Redes domésticas
+
+---
+
+## Instalação do Samba
+
+Atualizando os repositórios:
+
+```bash
+sudo apt update
+```
+
+Instalando o Samba:
+
+```bash
+sudo apt install samba -y
+```
+
+Verificando instalação:
+
+```bash
+samba --version
+```
+
+---
+
+## Configuração do Samba
+
+Arquivo principal de configuração:
+
+```bash
+/etc/samba/smb.conf
+```
+
+Abrindo o arquivo:
+
+```bash
+sudo nano /etc/samba/smb.conf
+```
+
+Sempre faça backup antes:
+
+```bash
+sudo cp /etc/samba/smb.conf /etc/samba/smb.conf.bkp
+```
+
+---
+
+## Criando diretórios compartilhados
+
+Criando uma pasta para compartilhamento:
+
+```bash
+sudo mkdir /srv/samba/arquivos
+```
+
+Ajustando permissões:
+
+```bash
+sudo chmod 2775 /srv/samba/arquivos
+sudo chown nobody:nogroup /srv/samba/arquivos
+```
+
+---
+
+## Configuração do compartilhamento
+
+No final do arquivo `smb.conf`:
+
+```ini
+[Arquivos]
+   path = /srv/samba/arquivos
+   browseable = yes
+   writable = yes
+   guest ok = no
+   read only = no
+```
+
+Explicação:
+
+| Parâmetro  | Função                   |
+| ---------- | ------------------------ |
+| path       | Caminho da pasta         |
+| browseable | Aparece na rede          |
+| writable   | Permite escrita          |
+| guest ok   | Permite acesso sem senha |
+| read only  | Define somente leitura   |
+
+---
+
+## Criando usuários Samba
+
+Criar usuário no sistema:
+
+```bash
+sudo adduser diego
+```
+
+Adicionar usuário ao Samba:
+
+```bash
+sudo smbpasswd -a diego
+```
+
+Ativar usuário:
+
+```bash
+sudo smbpasswd -e diego
+```
+
+---
+
+## Reiniciar serviço
+
+```bash
+sudo systemctl restart smbd
+```
+
+Verificar status:
+
+```bash
+sudo systemctl status smbd
+```
+
+---
+
+## Testando o compartilhamento
+
+No Windows:
+
+```
+\\IP_DO_SERVIDOR
+```
+
+Ou:
+
+```
+\\192.168.0.10
+```
+
+---
+
+## Comandos importantes
+
+Ver conexões ativas:
+
+```bash
+sudo smbstatus
+```
+
+Testar configuração:
+
+```bash
+testparm
+```
+
+Listar compartilhamentos:
+
+```bash
+smbclient -L localhost -U usuario
+```
+
+---
+
+# Servidor Web com Apache
+
+## O que é o Apache
+
+O **Apache HTTP Server** é um dos servidores web mais utilizados do mundo, mantido pela Apache Software Foundation.
+
+Ele permite:
+
+* Hospedar sites
+* Executar aplicações web
+* Criar múltiplos sites no mesmo servidor
+
+Utiliza protocolo:
+
+```
+HTTP / HTTPS
+```
+
+---
+
+## Instalação do Apache
+
+```bash
+sudo apt update
+sudo apt install apache2 -y
+```
+
+Verificando status:
+
+```bash
+sudo systemctl status apache2
+```
+
+Se estiver ativo:
+
+```
+active (running)
+```
+
+---
+
+## Testando no navegador
+
+Acesse:
+
+```
+http://localhost
+```
+
+ou
+
+```
+http://IP_DO_SERVIDOR
+```
+
+Página padrão:
+
+```
+Apache2 Ubuntu Default Page
+```
+
+---
+
+## Estrutura de diretórios do Apache
+
+Diretório principal:
+
+```
+/var/www/html
+```
+
+Arquivo padrão:
+
+```
+index.html
+```
+
+Arquivos de configuração:
+
+```
+/etc/apache2
+```
+
+Principais pastas:
+
+| Pasta           | Função                    |
+| --------------- | ------------------------- |
+| sites-available | Configurações disponíveis |
+| sites-enabled   | Configurações ativas      |
+| mods-available  | Módulos disponíveis       |
+| mods-enabled    | Módulos ativos            |
+
+---
+
+## Criando uma página web
+
+Editar:
+
+```bash
+sudo nano /var/www/html/index.html
+```
+
+Exemplo:
+
+```html
+<h1>Servidor Apache funcionando!</h1>
+```
+
+Salvar e acessar no navegador.
+
+---
+
+## Gerenciamento do serviço
+
+Iniciar:
+
+```bash
+sudo systemctl start apache2
+```
+
+Parar:
+
+```bash
+sudo systemctl stop apache2
+```
+
+Reiniciar:
+
+```bash
+sudo systemctl restart apache2
+```
+
+Habilitar no boot:
+
+```bash
+sudo systemctl enable apache2
+```
+
+---
+
+## Virtual Hosts
+
+Permite criar múltiplos sites no mesmo servidor.
+
+Criando arquivo:
+
+```bash
+sudo nano /etc/apache2/sites-available/meusite.conf
+```
+
+Exemplo:
+
+```apache
+<VirtualHost *:80>
+    ServerName meusite.local
+    DocumentRoot /var/www/meusite
+</VirtualHost>
+```
+
+Criando diretório:
+
+```bash
+sudo mkdir /var/www/meusite
+```
+
+Ativar site:
+
+```bash
+sudo a2ensite meusite.conf
+```
+
+Recarregar Apache:
+
+```bash
+sudo systemctl reload apache2
+```
+
+---
+
+## Testando configuração
+
+```bash
+sudo apache2ctl configtest
+```
+
+Se aparecer:
+
+```
+Syntax OK
+```
+
+Está correto.
+
+---
+
+## Comandos importantes
+
+| Comando                  | Função                            |
+| ------------------------ | --------------------------------- |
+| apache2ctl -S            | Ver Virtual Hosts                 |
+| a2ensite                 | Ativar site                       |
+| a2dissite                | Desativar site                    |
+| a2enmod                  | Ativar módulo                     |
+| systemctl reload apache2 | Recarregar sem derrubar o serviço |
+
+---
+
+# Boas práticas de segurança
+
+## Samba
+
+* Não usar `guest ok = yes` em redes públicas
+* Criar usuários individuais
+* Limitar permissões de pastas
+
+---
+
+## Apache
+
+Instalar firewall:
+
+```bash
+sudo apt install ufw
+```
+
+Liberar HTTP:
+
+```bash
+sudo ufw allow 80
+```
+
+Liberar HTTPS:
+
+```bash
+sudo ufw allow 443
+```
+
+Ativar firewall:
+
+```bash
+sudo ufw enable
+```
+
+---
+
+# Conclusão
+
+Com estes estudos foi possível aprender:
+
+* Instalar serviços no Linux
+* Configurar compartilhamento de arquivos
+* Criar servidor web
+* Trabalhar com permissões
+* Gerenciar serviços com **systemctl**
+
+Esses dois serviços são fundamentais para:
+
+* Administração de sistemas
+* DevOps
+* Infraestrutura
+
+---

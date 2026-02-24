@@ -34,3 +34,12 @@
 [![Certificado Linux](capa_gerenciamento_de_pacotes_e_discos_no_linux.png)](gerenciamentogerenciamento_de_pacotes_e_discos_no_linux_de_discos_linux.pdf)
 
 
+## Certificado: Gerenciamento de pacotes e discos no linux
+
+[![Certificado Linux](capa_ferramentas_desenvolvedor.png)](ferramentas_desenvolvedor.pdf)
+
+
+
+## Certificado: Gerenciamento de pacotes e discos no linux
+
+[![Certificado Linux](capa_formacao_linux.png)](formacao_linux.pdf)

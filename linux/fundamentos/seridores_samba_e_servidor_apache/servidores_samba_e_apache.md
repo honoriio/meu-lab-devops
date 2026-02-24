@@ -1,4 +1,3 @@
-````markdown
 # 📚 Estudos de Linux – Servidor de Arquivos (Samba) e Servidor Web (Apache)
 
 > Documentação criada durante meus estudos em Linux para entender na prática como configurar serviços essenciais de infraestrutura: compartilhamento de arquivos em rede e servidor web.
